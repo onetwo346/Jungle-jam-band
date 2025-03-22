@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jungle Jam Band - Daycare Edition</title>
+    <title>Jungle Jam Band - Daycare Wow</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { width: 100%; height: 100vh; }
-        #instructions { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial; }
+        #instructions { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial; font-size: 20px; }
     </style>
 </head>
 <body>
-    <div id="instructions">Tap to move Milo!</div>
+    <div id="instructions">Tap to move Milo! Find his bongos under the log!</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script>
         // Scene Setup
@@ -21,50 +21,94 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Lighting (Natural Jungle)
-        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.6); // Soft daylight
+        // Lighting (Jungle Sunlight)
+        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5); // Soft daylight
         scene.add(ambientLight);
         const sunLight = new THREE.DirectionalLight(0xFFFFE0, 0.8); // Warm sunlight
         sunLight.position.set(10, 20, 10);
+        sunLight.castShadow = true;
         scene.add(sunLight);
 
-        // Jungle Floor (Realistic Ground)
+        // Jungle Floor (Lush Ground)
         const groundGeometry = new THREE.PlaneGeometry(50, 50, 32, 32);
         const groundMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x3C2F2F, // Rich brown soil
-            map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') // Basic texture (replace with jungle floor later)
+            color: 0x2E8B57, // Jungle green
+            map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') // Grass texture
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
         scene.add(ground);
 
-        // Milo the Monkey (Realistic Stand-In)
-        const monkeyGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 32); // Tall, monkey-like shape
-        const monkeyMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x8B4513, // Brown fur
-            shininess: 10 
+        // River (Simple Water Plane)
+        const riverGeometry = new THREE.PlaneGeometry(10, 50);
+        const riverMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x4682B4, // Steel blue
+            transparent: true,
+            opacity: 0.8,
+            shininess: 100
         });
-        const monkey = new THREE.Mesh(monkeyGeometry, monkeyMaterial);
-        monkey.position.set(0, 0.5, 0);
-        scene.add(monkey);
+        const river = new THREE.Mesh(riverGeometry, riverMaterial);
+        river.rotation.x = -Math.PI / 2;
+        river.position.set(-10, 0.01, 0);
+        scene.add(river);
 
-        // Simple Tree (Jungle Detail)
-        const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.5, 3, 32);
-        const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x4A2F1A }); // Dark bark
-        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-        trunk.position.set(5, 1.5, 5);
-        scene.add(trunk);
-        const leavesGeometry = new THREE.SphereGeometry(1.5, 32, 32);
-        const leavesMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 }); // Green foliage
-        const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
-        leaves.position.set(5, 3.5, 5);
-        scene.add(leaves);
+        // Trees (Multiple for Jungle Density)
+        for (let i = 0; i < 5; i++) {
+            const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.5, 4, 32);
+            const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x4A2F1A }); // Dark bark
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+            trunk.position.set((Math.random() - 0.5) * 40, 2, (Math.random() - 0.5) * 40);
+            trunk.castShadow = true;
+            scene.add(trunk);
+
+            const leavesGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const leavesMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 }); // Green foliage
+            const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+            leaves.position.set(trunk.position.x, 4.5, trunk.position.z);
+            leaves.castShadow = true;
+            scene.add(leaves);
+        }
+
+        // Fallen Log (Hides Bongos)
+        const logGeometry = new THREE.CylinderGeometry(0.4, 0.4, 5, 32);
+        const logMaterial = new THREE.MeshPhongMaterial({ color: 0x4A2F1A });
+        const log = new THREE.Mesh(logGeometry, logMaterial);
+        log.rotation.z = Math.PI / 2;
+        log.position.set(5, 0.4, 5);
+        log.castShadow = true;
+        scene.add(log);
+
+        // Bongos (Hidden Instrument)
+        const bongosGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.5, 32);
+        const bongosMaterial = new THREE.MeshPhongMaterial({ color: 0xD2691E }); // Wooden brown
+        const bongos = new THREE.Mesh(bongosGeometry, bongosMaterial);
+        bongos.position.set(5, 0.5, 5);
+        bongos.visible = false; // Hidden until found
+        scene.add(bongos);
+
+        // Milo the Monkey (Realistic Stand-In)
+        const monkeyBodyGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 32);
+        const monkeyMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); // Brown fur
+        const monkeyBody = new THREE.Mesh(monkeyBodyGeometry, monkeyMaterial);
+        monkeyBody.position.set(0, 0.5, 0);
+        monkeyBody.castShadow = true;
+        scene.add(monkeyBody);
+
+        // Monkey Head
+        const monkeyHeadGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+        const monkeyHead = new THREE.Mesh(monkeyHeadGeometry, monkeyMaterial);
+        monkeyHead.position.set(0, 1.2, 0);
+        scene.add(monkeyHead);
 
         // Camera
         camera.position.set(0, 5, 10);
-        camera.lookAt(monkey.position);
+        camera.lookAt(monkeyBody.position);
 
         // Movement (Tap to Move)
+        let monkey = new THREE.Group();
+        monkey.add(monkeyBody);
+        monkey.add(monkeyHead);
         document.addEventListener('click', (event) => {
             const mouse = new THREE.Vector2(
                 (event.clientX / window.innerWidth) * 2 - 1,
@@ -72,17 +116,34 @@
             );
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(ground);
+            const intersects = raycaster.intersectObjects([ground, log]);
             if (intersects.length > 0) {
                 const target = intersects[0].point;
                 monkey.position.x = target.x;
                 monkey.position.z = target.z;
+
+                // Check if near log to reveal bongos
+                const distanceToLog = monkey.position.distanceTo(log.position);
+                if (distanceToLog < 2) {
+                    bongos.visible = true;
+                    document.getElementById('instructions').innerText = "You found the bongos! Tap them to grab!";
+                }
+
+                // Collect bongos
+                const distanceToBongos = monkey.position.distanceTo(bongos.position);
+                if (distanceToBongos < 1 && bongos.visible) {
+                    scene.remove(bongos);
+                    document.getElementById('instructions').innerText = "Milo got his bongos! Find the next instrument!";
+                }
             }
         });
 
-        // Animation Loop
+        // Animation Loop (Jungle Life)
+        let time = 0;
         function animate() {
             requestAnimationFrame(animate);
+            time += 0.05;
+            riverMaterial.opacity = 0.8 + Math.sin(time) * 0.1; // Water shimmer
             monkey.rotation.y += 0.02; // Gentle sway
             renderer.render(scene, camera);
         }
