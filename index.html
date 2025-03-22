@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jungle Jam Band - Cosmic Edition</title>
+    <title>Jungle Jam Band - Daycare Edition</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { width: 100%; height: 100vh; }
@@ -21,59 +21,50 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Lighting (Cosmic Glow)
-        const ambientLight = new THREE.AmbientLight(0x404040); // Soft base light
+        // Lighting (Natural Jungle)
+        const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.6); // Soft daylight
         scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0x00FFFF, 1, 100); // Cyan glow
-        pointLight.position.set(0, 10, 10);
-        scene.add(pointLight);
+        const sunLight = new THREE.DirectionalLight(0xFFFFE0, 0.8); // Warm sunlight
+        sunLight.position.set(10, 20, 10);
+        scene.add(sunLight);
 
-        // Jungle Floor (Glowing Terrain)
-        const groundGeometry = new THREE.PlaneGeometry(100, 100, 32, 32);
+        // Jungle Floor (Realistic Ground)
+        const groundGeometry = new THREE.PlaneGeometry(50, 50, 32, 32);
         const groundMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0x1A3C34, // Deep teal
-            emissive: 0x00FFCC, // Neon glow
-            emissiveIntensity: 0.3,
-            shininess: 50
+            color: 0x3C2F2F, // Rich brown soil
+            map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/terrain/grasslight-big.jpg') // Basic texture (replace with jungle floor later)
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
         scene.add(ground);
 
-        // Milo the Cosmic Monkey (Glowing Sphere for Now)
-        const monkeyGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+        // Milo the Monkey (Realistic Stand-In)
+        const monkeyGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 32); // Tall, monkey-like shape
         const monkeyMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0xC0C0C0, // Silver fur
-            emissive: 0x0000FF, // Blue glow
-            emissiveIntensity: 0.5,
-            shininess: 100
+            color: 0x8B4513, // Brown fur
+            shininess: 10 
         });
         const monkey = new THREE.Mesh(monkeyGeometry, monkeyMaterial);
         monkey.position.set(0, 0.5, 0);
         scene.add(monkey);
 
-        // Particle System (Cosmic Dust Trail)
-        const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 100;
-        const posArray = new Float32Array(particlesCount * 3);
-        for (let i = 0; i < particlesCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 20;
-        }
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMaterial = new THREE.PointsMaterial({ 
-            color: 0xFFFFFF, 
-            size: 0.1, 
-            transparent: true, 
-            opacity: 0.8 
-        });
-        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particles);
+        // Simple Tree (Jungle Detail)
+        const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.5, 3, 32);
+        const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x4A2F1A }); // Dark bark
+        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+        trunk.position.set(5, 1.5, 5);
+        scene.add(trunk);
+        const leavesGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+        const leavesMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 }); // Green foliage
+        const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+        leaves.position.set(5, 3.5, 5);
+        scene.add(leaves);
 
-        // Camera Setup
-        camera.position.set(0, 10, 15);
+        // Camera
+        camera.position.set(0, 5, 10);
         camera.lookAt(monkey.position);
 
-        // Movement (Tap to Move with Glow Trail)
+        // Movement (Tap to Move)
         document.addEventListener('click', (event) => {
             const mouse = new THREE.Vector2(
                 (event.clientX / window.innerWidth) * 2 - 1,
@@ -86,17 +77,13 @@
                 const target = intersects[0].point;
                 monkey.position.x = target.x;
                 monkey.position.z = target.z;
-                particles.position.set(target.x, 0.5, target.z); // Dust follows
             }
         });
 
-        // Animation Loop (Pulse Effect)
-        let time = 0;
+        // Animation Loop
         function animate() {
             requestAnimationFrame(animate);
-            time += 0.05;
-            monkeyMaterial.emissiveIntensity = 0.5 + Math.sin(time) * 0.3; // Pulsing glow
-            particles.rotation.y += 0.01; // Cosmic swirl
+            monkey.rotation.y += 0.02; // Gentle sway
             renderer.render(scene, camera);
         }
         animate();
